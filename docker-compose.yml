@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  nginx:
+    image: 'nginx:1.14-alpine'
+    ports:
+      - '80:80'
+      - '443:443'
+    links:
+      - php
+    environment:
+      # read from .env
+      - BACKEND_HOST=${BACKEND_HOST}
+      - FRONTEND_HOST=${FRONTEND_HOST}
+      - DOLLAR=${DOLLAR} # for envsubst
+    volumes:
+      # conf
+      - './nginx/nginx.conf.template:/etc/nginx//nginx.conf.template'
+      # log
+      - './volumes/log/nginx:/var/log/nginx'
+      # projects
+      - './volumes/www/backend:/var/www/backend'
+      - './volumes/www/frontend:/var/www/frontend'
+    command:  >
+      /bin/sh -c "envsubst < /etc/nginx//nginx.conf.template> /etc/nginx/nginx.conf && nginx"
+  php:
+    image: 'php:7.2.9-fpm'
